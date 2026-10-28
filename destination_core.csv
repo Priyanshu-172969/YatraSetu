@@ -1,0 +1,31 @@
+﻿destination_id,place_name,locality_city,district,state_ut,category
+1,Taj Mahal,Agra,Agra,Uttar Pradesh,Heritage
+2,Qutb Minar,"Mehrauli, New Delhi",South Delhi,Delhi,Heritage
+3,Amber Fort,"Amer, Jaipur",Jaipur,Rajasthan,Heritage
+4,Ajanta Caves,"Ajanta, near Chhatrapati Sambhajinagar (Aurangabad)",Chhatrapati Sambhajinagar,Maharashtra,Heritage
+5,Ellora Caves,"Ellora, near Chhatrapati Sambhajinagar (Aurangabad)",Chhatrapati Sambhajinagar,Maharashtra,Heritage
+6,Konark Sun Temple,Konark,Puri,Odisha,Heritage
+7,Hampi Group of Monuments,Hampi,Vijayanagara,Karnataka,Heritage
+8,Khajuraho Group of Monuments,Khajuraho,Chhatarpur,Madhya Pradesh,Heritage
+9,Sanchi Stupa,Sanchi,Raisen,Madhya Pradesh,Heritage
+10,Golden Temple (Sri Harmandir Sahib),Amritsar,Amritsar,Punjab,Religious/Pilgrimage
+11,Mahabodhi Temple Complex,Bodh Gaya,Gaya,Bihar,Religious/Pilgrimage
+12,Nalanda Mahavihara,Nalanda,Nalanda,Bihar,Heritage
+13,Santiniketan,Bolpur,Birbhum,West Bengal,Cultural
+14,Jaisalmer Fort,Jaisalmer,Jaisalmer,Rajasthan,Heritage
+15,Kedarnath Temple,"Kedarnath, via Gaurikund",Rudraprayag,Uttarakhand,Religious/Pilgrimage
+16,Shri Mata Vaishno Devi Shrine,Katra,Reasi,Jammu and Kashmir,Religious/Pilgrimage
+17,Tirumala Venkateswara Temple,Tirumala,Tirupati,Andhra Pradesh,Religious/Pilgrimage
+18,Jagannath Temple,Puri,Puri,Odisha,Religious/Pilgrimage
+19,Ramanathaswamy Temple,Rameswaram,Ramanathapuram,Tamil Nadu,Religious/Pilgrimage
+20,Kashi Vishwanath Temple,Varanasi,Varanasi,Uttar Pradesh,Religious/Pilgrimage
+21,Kaziranga National Park,Kohora/Bokakhat,Golaghat and adjoining districts,Assam,Wildlife
+22,Sundarbans National Park,Sundarbans delta; access via designated gateways,South 24 Parganas,West Bengal,Wildlife/Nature
+23,Ranthambore National Park,Sawai Madhopur,Sawai Madhopur,Rajasthan,Wildlife
+24,Keoladeo National Park,Bharatpur,Bharatpur,Rajasthan,Wildlife/Nature
+25,Eravikulam National Park,Near Munnar,Idukki,Kerala,Wildlife/Nature
+26,Valley of Flowers National Park,Via Govindghat and Ghangaria,Chamoli,Uttarakhand,Nature/Mountain
+27,Radhanagar Beach,Swaraj Dweep (Havelock Island),South Andaman,Andaman and Nicobar Islands,Beach/Nature
+28,Dal Lake,Srinagar,Srinagar,Jammu and Kashmir,Nature/Lake
+29,Nohkalikai Falls,Sohra (Cherrapunji),East Khasi Hills,Meghalaya,Nature/Waterfall
+30,Calangute Beach,Calangute,North Goa,Goa,Beach/Coastal

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_edit %}Edit Destination: {{ destination.place_name }}{% else %}Add New Destination{% endif %} - YatraSetu
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('manage_destinations') }}" style="color: var(--color-accent); text-decoration: none; font-size: 0.88rem;">&larr; Back to Management</a>
+        <h1 class="page-title" style="margin-top: 0.35rem;">
+            {% if is_edit %}Edit Destination #{{ destination.destination_id }}{% else %}Add New Destination{% endif %}
+        </h1>
+        <p class="page-subtitle">
+            {% if is_edit %}Update core location metadata and descriptive travel details{% else %}Create a synchronized record across <code>destination_core</code> and <code>destination_details</code>{% endif %}
+        </p>
+    </div>
+</div>
+
+<form method="POST" class="needs-validation" style="max-width: 900px; margin-bottom: 2.5rem;">
+    <!-- Section 1: Core Geographical Information -->
+    <div class="detail-section">
+        <h2 class="section-heading">1. Core Information (Table: <code>destination_core</code>)</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="place_name">Place Name *</label>
+                <input type="text" id="place_name" name="place_name" class="form-control" required maxlength="150"
+                       value="{{ destination.place_name if destination else '' }}" placeholder="e.g. Meenakshi Amman Temple">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="locality_city">City / Locality *</label>
+                <input type="text" id="locality_city" name="locality_city" class="form-control" required maxlength="150"
+                       value="{{ destination.locality_city if destination else '' }}" placeholder="e.g. Madurai">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="district">District *</label>
+                <input type="text" id="district" name="district" class="form-control" required maxlength="100"
+                       value="{{ destination.district if destination else '' }}" placeholder="e.g. Madurai">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="state_ut">State or Union Territory *</label>
+                <input type="text" id="state_ut" name="state_ut" class="form-control" required maxlength="100"
+                       value="{{ destination.state_ut if destination else '' }}" placeholder="e.g. Tamil Nadu">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="category">Category *</label>
+                <input type="text" id="category" name="category" class="form-control" required maxlength="100"
+                       value="{{ destination.category if destination else '' }}" placeholder="e.g. Religious/Pilgrimage, Heritage, Wildlife">
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Detailed Travel Information -->
+    <div class="detail-section">
+        <h2 class="section-heading">2. Narrative & Travel Details (Table: <code>destination_details</code>)</h2>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="description">Comprehensive Description *</label>
+            <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Historical, cultural, or ecological overview...">{{ destination.description if destination else '' }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="best_time_to_visit">Best Time to Visit *</label>
+                <input type="text" id="best_time_to_visit" name="best_time_to_visit" class="form-control" required maxlength="500"
+                       value="{{ destination.best_time_to_visit if destination else '' }}" placeholder="e.g. October to March">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="local_languages">Local Languages *</label>
+                <input type="text" id="local_languages" name="local_languages" class="form-control" required maxlength="255"
+                       value="{{ destination.local_languages if destination else '' }}" placeholder="e.g. Tamil, English, Hindi">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="entry_fee_text">Entry Fee Details *</label>
+                <input type="text" id="entry_fee_text" name="entry_fee_text" class="form-control" required maxlength="500"
+                       value="{{ destination.entry_fee_text if destination else '' }}" placeholder="e.g. Free entry; special darshan INR 50">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="opening_hours_text">Opening Hours *</label>
+                <input type="text" id="opening_hours_text" name="opening_hours_text" class="form-control" required maxlength="500"
+                       value="{{ destination.opening_hours_text if destination else '' }}" placeholder="e.g. 5:00 AM - 12:30 PM, 4:00 PM - 9:30 PM">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="major_attractions">Major Attractions *</label>
+            <textarea id="major_attractions" name="major_attractions" class="form-control" rows="2" required placeholder="Key temples, shrines, viewpoints, or historical wings...">{{ destination.major_attractions if destination else '' }}</textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="how_to_reach">How to Reach *</label>
+            <textarea id="how_to_reach" name="how_to_reach" class="form-control" rows="2" required placeholder="Nearest airport, railway junctions, and highway routes...">{{ destination.how_to_reach if destination else '' }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="primary_official_source_url">Primary Official Portal URL *</label>
+                <input type="url" id="primary_official_source_url" name="primary_official_source_url" class="form-control" required maxlength="500"
+                       value="{{ destination.primary_official_source_url if destination else '' }}" placeholder="https://www.tamilnadutourism.tn.gov.in">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="supporting_source_urls">Supporting Source URL (Optional)</label>
+                <input type="url" id="supporting_source_urls" name="supporting_source_urls" class="form-control" maxlength="500"
+                       value="{{ destination.supporting_source_urls if destination and destination.supporting_source_urls else '' }}" placeholder="https://asi.nic.in">
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Action Buttons -->
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <a href="{{ url_for('manage_destinations') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            {% if is_edit %}💾 Save Changes{% else %}✨ Create Destination{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}

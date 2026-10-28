@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}YatraSetu - Indian Destination Explorer & Trip Planner{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-card">
+    <span class="hero-tag">Gateway to Indian Journeys</span>
+    <h1 class="hero-title">Explore India's Rich Heritage & Plan Realistic Journeys</h1>
+    <p class="hero-lead">
+        YatraSetu bridges historical discovery, regional travel logistics, and itemized budget estimates 
+        from major Indian transit hubs. Build multi-stop custom itineraries and compare travel expenses across starting cities.
+    </p>
+    <div class="hero-actions">
+        <a href="{{ url_for('destination_list') }}" class="btn btn-primary">🧭 Explore Destinations</a>
+        <a href="{{ url_for('budget_compare') }}" class="btn btn-outline-light">💰 Compare City Budgets</a>
+        <a href="{{ url_for('trip_list') }}" class="btn btn-secondary">🗺️ Plan Itineraries</a>
+    </div>
+</section>
+
+<!-- Database-Driven Statistics Grid -->
+<section class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Destinations</span>
+        <span class="stat-value">{{ stats.total_destinations }}</span>
+        <span class="stat-desc">Curated cultural, heritage & natural sites</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">States & UTs Covered</span>
+        <span class="stat-value">{{ stats.total_states }}</span>
+        <span class="stat-desc">Across Northern, Southern, Eastern & Western India</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Travel Categories</span>
+        <span class="stat-value">{{ stats.total_categories }}</span>
+        <span class="stat-desc">Heritage, Wildlife, Pilgrimage & Coastal</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Origin Budget Routes</span>
+        <span class="stat-value">{{ stats.total_budgets }}</span>
+        <span class="stat-desc">Itemized estimates from major departure cities</span>
+    </div>
+</section>
+
+<!-- Destination Highlights Section (Database-Driven) -->
+<section style="margin-top: 1rem;">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Featured Destinations</h2>
+            <p class="page-subtitle">Highlights from our normalized MySQL database</p>
+        </div>
+        <a href="{{ url_for('destination_list') }}" class="btn btn-secondary btn-sm">View All Destinations &rarr;</a>
+    </div>
+
+    {% if highlights %}
+        <div class="card-grid">
+            {% for dest in highlights %}
+                <div class="card">
+                    <div class="card-header-bar">
+                        <span class="badge badge-default">{{ dest.category }}</span>
+                        <small style="color: var(--text-light); font-weight: 600;">ID #{{ dest.destination_id }}</small>
+                    </div>
+                    <h3 style="margin-bottom: 0.35rem;">
+                        <a href="{{ url_for('destination_detail', destination_id=dest.destination_id) }}" class="card-title">
+                            {{ dest.place_name }}
+                        </a>
+                    </h3>
+                    <div class="card-location">
+                        📍 {{ dest.locality_city }}, {{ dest.state_ut }}
+                    </div>
+                    <p class="card-desc">
+                        {{ dest.description[:140] }}{% if dest.description|length > 140 %}...{% endif %}
+                    </p>
+                    <div class="card-footer-actions">
+                        <a href="{{ url_for('destination_detail', destination_id=dest.destination_id) }}" class="btn btn-secondary btn-sm">
+                            View Details
+                        </a>
+                        <a href="{{ url_for('budget_compare', destination_id=dest.destination_id) }}" class="btn btn-primary btn-sm">
+                            Check Budgets
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background-color: var(--bg-surface); padding: 2rem; border-radius: var(--radius-lg); text-align: center; border: 1px solid var(--border-light);">
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">No destination records found in the database.</p>
+            <a href="{{ url_for('manage_destinations') }}" class="btn btn-primary">Add a Destination</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

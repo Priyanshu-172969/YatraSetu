@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}SQL Analytics & Reports - YatraSetu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">SQL Analytics & Reports Dashboard</h1>
+        <p class="page-subtitle">Demonstrate relational queries, aggregate functions, GROUP BY, HAVING, Joins, and Subqueries</p>
+    </div>
+</div>
+
+<!-- Report Navigation Tabs / Section Anchors -->
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+    <a href="#report-states" class="btn btn-secondary btn-sm">📍 State Distribution</a>
+    <a href="#report-categories" class="btn btn-secondary btn-sm">🏷️ Category Counts</a>
+    <a href="#report-cities" class="btn btn-secondary btn-sm">📊 City Budget Averages</a>
+    <a href="#report-subquery" class="btn btn-secondary btn-sm">🔍 Above-Avg Subquery</a>
+    <a href="#report-joined" class="btn btn-secondary btn-sm">🔗 Joined Core & Details</a>
+</div>
+
+<!-- Report 1: State/UT Distribution -->
+<div id="report-states" class="detail-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+            <h2 class="section-heading" style="margin-bottom: 0.25rem;">1. Destinations Grouped by State / UT</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">SQL Concepts: <code>COUNT(*)</code>, <code>GROUP BY state_ut</code>, <code>ORDER BY count DESC</code></p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>State or Union Territory</th>
+                    <th style="text-align: right; width: 180px;">Total Destinations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in state_counts %}
+                    <tr>
+                        <td><strong>{{ row.state_ut }}</strong></td>
+                        <td style="text-align: right; font-weight: 700; color: var(--color-primary);">{{ row.dest_count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Report 2: Category Distribution -->
+<div id="report-categories" class="detail-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+            <h2 class="section-heading" style="margin-bottom: 0.25rem;">2. Destination Counts by Category</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">SQL Concepts: <code>GROUP BY category</code>, <code>HAVING COUNT(*) >= 1</code></p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tourism Category</th>
+                    <th style="text-align: right; width: 180px;">Destination Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in category_counts %}
+                    <tr>
+                        <td><span class="badge badge-default">{{ row.category }}</span></td>
+                        <td style="text-align: right; font-weight: 700; color: var(--color-primary);">{{ row.cat_count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Report 3: Starting City Budget Averages -->
+<div id="report-cities" class="detail-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+            <h2 class="section-heading" style="margin-bottom: 0.25rem;">3. Budget Statistics by Starting Departure City</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">SQL Concepts: <code>AVG()</code>, <code>MIN()</code>, <code>MAX()</code>, <code>ROUND()</code>, <code>GROUP BY starting_city</code></p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Starting Hub</th>
+                    <th style="text-align: center;">Routes Evaluated</th>
+                    <th style="text-align: right;">Average Budget (INR)</th>
+                    <th style="text-align: right;">Min Budget (INR)</th>
+                    <th style="text-align: right;">Max Budget (INR)</th>
+                    <th style="text-align: right;">Avg Transit Fare (INR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in city_budget_stats %}
+                    <tr>
+                        <td><strong>🛫 {{ row.starting_city }}</strong></td>
+                        <td style="text-align: center;">{{ row.route_count }}</td>
+                        <td style="text-align: right; font-weight: 700; color: var(--color-primary);">₹{{ "{:,.2f}".format(row.avg_budget) }}</td>
+                        <td style="text-align: right; color: var(--color-success);">₹{{ "{:,.2f}".format(row.min_budget) }}</td>
+                        <td style="text-align: right; color: var(--color-accent);">₹{{ "{:,.2f}".format(row.max_budget) }}</td>
+                        <td style="text-align: right;">₹{{ "{:,.2f}".format(row.avg_transit) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Report 4: Subquery Demonstration (Above-Average Budget Destinations) -->
+<div id="report-subquery" class="detail-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+            <h2 class="section-heading" style="margin-bottom: 0.25rem;">4. Destinations with Above-Average Budget from New Delhi</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+                SQL Concepts: <code>WHERE estimated_total_budget_inr > (SELECT AVG(estimated_total_budget_inr)...)</code>
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Destination Name</th>
+                    <th>State / UT</th>
+                    <th>Duration</th>
+                    <th style="text-align: right;">Estimated Budget (INR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in above_avg_routes %}
+                    <tr>
+                        <td><strong>{{ row.place_name }}</strong></td>
+                        <td>{{ row.state_ut }}</td>
+                        <td>{{ row.trip_duration_days }} Days</td>
+                        <td style="text-align: right; font-weight: 700; color: var(--color-accent);">₹{{ "{:,.2f}".format(row.estimated_total_budget_inr) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Report 5: Multi-table Joined Report -->
+<div id="report-joined" class="detail-section">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+            <h2 class="section-heading" style="margin-bottom: 0.25rem;">5. Combined Destination, Visiting Logistics & Budget Highlights</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+                SQL Concepts: <code>INNER JOIN destination_details</code> + <code>INNER JOIN budget_estimates</code>
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Destination</th>
+                    <th>Best Time to Visit</th>
+                    <th>Local Languages</th>
+                    <th>Departure Hub</th>
+                    <th style="text-align: right;">Estimated Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in joined_report %}
+                    <tr>
+                        <td>
+                            <strong>{{ row.place_name }}</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">{{ row.category }} &bull; {{ row.state_ut }}</div>
+                        </td>
+                        <td>{{ row.best_time_to_visit }}</td>
+                        <td>{{ row.local_languages }}</td>
+                        <td>🛫 {{ row.starting_city }}</td>
+                        <td style="text-align: right; font-weight: 700; color: var(--color-primary);">₹{{ "{:,.2f}".format(row.estimated_total_budget_inr) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

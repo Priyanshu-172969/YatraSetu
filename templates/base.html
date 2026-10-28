@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}YatraSetu: Indian Destination Explorer & Trip Planner{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="brand-logo">
+                <span>🏛️ YatraSetu</span>
+                <span class="brand-badge">India</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
+                    <li><a href="{{ url_for('destination_list') }}" class="{% if request.endpoint == 'destination_list' %}active{% endif %}">Explore</a></li>
+                    <li><a href="{{ url_for('budget_compare') }}" class="{% if request.endpoint == 'budget_compare' %}active{% endif %}">Budgets</a></li>
+                    <li><a href="{{ url_for('trip_list') }}" class="{% if request.endpoint and request.endpoint.startswith('trip_') %}active{% endif %}">Trip Planner</a></li>
+                    <li><a href="{{ url_for('reports_dashboard') }}" class="{% if request.endpoint == 'reports_dashboard' %}active{% endif %}">SQL Reports</a></li>
+                    <li><a href="{{ url_for('manage_destinations') }}" class="nav-cta {% if request.endpoint and request.endpoint.startswith('manage_') %}active{% endif %}">Manage</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Generic Confirmation Modal for Deletions -->
+    <div id="deleteConfirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle" class="modal-title">Confirm Deletion</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteItemName">this record</strong>?</p>
+                <p id="deleteWarningText" style="color: var(--color-danger); margin-top: 0.5rem; font-size: 0.88rem;">
+                    This action is permanent and cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="deleteCancelBtn" class="btn btn-secondary">Cancel</button>
+                <form id="deleteConfirmForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-copy">
+                <strong>YatraSetu: An Indian Destination Explorer and Trip Planner</strong>
+                <span>College DBMS Individual Academic Project | MySQL 8.0.40 & Python Flask</span>
+            </div>
+            <ul class="footer-links">
+                <li><a href="{{ url_for('destination_list') }}">Destinations</a></li>
+                <li><a href="{{ url_for('budget_compare') }}">Budget Analysis</a></li>
+                <li><a href="{{ url_for('trip_list') }}">Itineraries</a></li>
+                <li><a href="{{ url_for('reports_dashboard') }}">Reports</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

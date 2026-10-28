@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ trip.trip_name }} - Itinerary Details - YatraSetu{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom: 1.25rem; font-size: 0.88rem; color: var(--text-muted);">
+    <a href="{{ url_for('trip_list') }}" style="color: var(--color-accent); text-decoration: none;">&larr; Back to All Trip Plans</a>
+    <span> / </span>
+    <span>{{ trip.trip_name }}</span>
+</div>
+
+<!-- Header -->
+<div class="page-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <span class="badge" style="background-color: #e0e7ff; color: #3730a3;">Origin: {{ trip.starting_city }}</span>
+            <small style="color: var(--text-light); font-weight: 600;">Trip ID #{{ trip.trip_id }}</small>
+        </div>
+        <h1 class="page-title">{{ trip.trip_name }}</h1>
+        <p class="page-subtitle">
+            Target Duration: <strong>{{ trip.planned_duration_days }} Days</strong>
+            {% if trip.created_at %}&nbsp;|&nbsp; Created: {{ trip.created_at.strftime('%d %b %Y') }}{% endif %}
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('trip_edit', trip_id=trip.trip_id) }}" class="btn btn-secondary">✏️ Edit Details</a>
+        <button type="button"
+                class="btn btn-danger btn-delete-trigger"
+                data-action="{{ url_for('trip_delete', trip_id=trip.trip_id) }}"
+                data-name="{{ trip.trip_name }}"
+                data-warning="Deleting this trip plan will automatically remove all scheduled stops (ON DELETE CASCADE).">
+            🗑️ Delete Trip
+        </button>
+    </div>
+</div>
+
+{% if trip.notes %}
+    <div style="background-color: var(--bg-surface); border-left: 4px solid var(--color-accent); padding: 1rem 1.25rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
+        <span style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.25rem;">Trip Notes</span>
+        <p style="color: var(--text-main); font-size: 0.95rem;">{{ trip.notes }}</p>
+    </div>
+{% endif %}
+
+<!-- Stops & Itinerary Sequence -->
+<div class="detail-grid">
+    <!-- Left Column: Itinerary Stops Table -->
+    <div>
+        <div class="detail-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--color-accent-soft); padding-bottom: 0.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin: 0;">
+                    Scheduled Stops ({{ stops|length }})
+                </h2>
+                {% set stop_days = stops|sum(attribute='planned_days') %}
+                <span class="badge" style="background-color: var(--bg-muted); color: var(--text-main); font-size: 0.85rem;">
+                    Total Stop Days: <strong>{{ stop_days }}</strong> / {{ trip.planned_duration_days }}
+                </span>
+            </div>
+
+            {% if stops %}
+                <div class="table-responsive" style="margin-bottom: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px; text-align: center;">Order</th>
+                                <th>Destination</th>
+                                <th>State / UT</th>
+                                <th style="width: 80px; text-align: center;">Days</th>
+                                <th>Stop Notes</th>
+                                <th style="width: 140px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stop in stops %}
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; background-color: var(--color-primary); color: #ffffff; border-radius: 50%; font-weight: 700; font-size: 0.85rem;">
+                                            {{ stop.visit_order }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('destination_detail', destination_id=stop.destination_id) }}" style="color: var(--color-primary); font-weight: 600; text-decoration: none;">
+                                            {{ stop.place_name }}
+                                        </a>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ stop.locality_city }}</div>
+                                    </td>
+                                    <td>{{ stop.state_ut }}</td>
+                                    <td style="text-align: center; font-weight: 600;">
+                                        {{ stop.planned_days }} d
+                                    </td>
+                                    <td style="font-size: 0.85rem; color: var(--text-muted);">
+                                        {{ stop.stop_notes or '-' }}
+                                    </td>
+                                    <td style="text-align: right; white-space: nowrap;">
+                                        <!-- Move Up Form -->
+                                        {% if not loop.first %}
+                                            <form method="POST" action="{{ url_for('trip_move_stop', trip_id=trip.trip_id, stop_id=stop.stop_id, direction='up') }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Move Up" style="padding: 0.2rem 0.45rem;">▲</button>
+                                            </form>
+                                        {% endif %}
+
+                                        <!-- Move Down Form -->
+                                        {% if not loop.last %}
+                                            <form method="POST" action="{{ url_for('trip_move_stop', trip_id=trip.trip_id, stop_id=stop.stop_id, direction='down') }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Move Down" style="padding: 0.2rem 0.45rem;">▼</button>
+                                            </form>
+                                        {% endif %}
+
+                                        <!-- Remove Stop Button -->
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm btn-delete-trigger"
+                                                style="padding: 0.2rem 0.5rem;"
+                                                data-action="{{ url_for('trip_delete_stop', trip_id=trip.trip_id, stop_id=stop.stop_id) }}"
+                                                data-name="Stop #{{ stop.visit_order }}: {{ stop.place_name }}"
+                                                data-warning="This destination stop will be removed from this trip plan.">
+                                            ✕
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">
+                    No destinations have been added to this trip plan yet. Use the form on the right to add your first stop.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Add New Stop Form -->
+    <div>
+        <div class="detail-section">
+            <h2 class="section-heading">📍 Add a Stop</h2>
+            <form method="POST" action="{{ url_for('trip_add_stop', trip_id=trip.trip_id) }}" class="needs-validation">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label class="form-label" for="destination_id">Select Destination *</label>
+                    <select id="destination_id" name="destination_id" class="form-control" required>
+                        <option value="">-- Choose Destination --</option>
+                        {% for d in all_destinations %}
+                            <option value="{{ d.destination_id }}">
+                                {{ d.place_name }} ({{ d.state_ut }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label class="form-label" for="planned_days">Days at Stop *</label>
+                    <input type="number" id="planned_days" name="planned_days" class="form-control" required min="1" max="30" value="2">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label" for="stop_notes">Stop Notes (Optional)</label>
+                    <textarea id="stop_notes" name="stop_notes" class="form-control" rows="2" placeholder="Activities, sunrise viewpoint, hotel preference..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    + Add to Itinerary
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

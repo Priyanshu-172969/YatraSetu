@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Application Error - YatraSetu{% endblock %}
+
+{% block content %}
+<div style="background-color: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 4rem 2rem; text-align: center; max-width: 650px; margin: 3rem auto;">
+    <h1 style="font-size: 3rem; color: var(--color-danger); font-weight: 800; margin-bottom: 0.5rem;">500</h1>
+    <h2 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 1rem;">Server Operation Encountered an Issue</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+        An unexpected error occurred while processing your request. Any active database transactions have been safely rolled back.
+    </p>
+    {% if error_message %}
+        <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.88rem; color: var(--color-primary); margin-bottom: 2rem; text-align: left;">
+            {{ error_message }}
+        </div>
+    {% endif %}
+    <a href="{{ url_for('home') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}

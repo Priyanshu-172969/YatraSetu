@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ destination.place_name }} - YatraSetu{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb navigation -->
+<div style="margin-bottom: 1.25rem; font-size: 0.88rem; color: var(--text-muted);">
+    <a href="{{ url_for('destination_list') }}" style="color: var(--color-accent); text-decoration: none;">&larr; Back to Destinations</a>
+    <span> / </span>
+    <span>{{ destination.state_ut }}</span>
+    <span> / </span>
+    <span>{{ destination.place_name }}</span>
+</div>
+
+<!-- Header -->
+<div class="page-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <span class="badge badge-default">{{ destination.category }}</span>
+            <small style="color: var(--text-light); font-weight: 600;">Destination ID #{{ destination.destination_id }}</small>
+        </div>
+        <h1 class="page-title">{{ destination.place_name }}</h1>
+        <p class="page-subtitle">📍 {{ destination.locality_city }}, {{ destination.district }} District, {{ destination.state_ut }}</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{{ url_for('budget_compare', destination_id=destination.destination_id) }}" class="btn btn-primary">
+            💰 Compare Budgets
+        </a>
+        <a href="{{ url_for('destination_edit', destination_id=destination.destination_id) }}" class="btn btn-secondary">
+            ✏️ Edit Record
+        </a>
+    </div>
+</div>
+
+<!-- 2-Column Detail Layout -->
+<div class="detail-grid">
+    <!-- Left Column: Main Narrative & Details -->
+    <div>
+        <div class="detail-section">
+            <h2 class="section-heading">About the Destination</h2>
+            <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-main); margin-bottom: 1.5rem;">
+                {{ destination.description }}
+            </p>
+
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">Major Attractions & Highlights</h3>
+            <p style="color: var(--text-main); line-height: 1.6; margin-bottom: 1.5rem;">
+                {{ destination.major_attractions }}
+            </p>
+
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">How to Reach</h3>
+            <p style="color: var(--text-main); line-height: 1.6;">
+                {{ destination.how_to_reach }}
+            </p>
+        </div>
+
+        <!-- Add to Trip Plan Section -->
+        <div class="detail-section">
+            <h2 class="section-heading">Add to a Trip Plan</h2>
+            {% if trips %}
+                <form method="POST" action="{{ url_for('trip_add_stop_from_dest', destination_id=destination.destination_id) }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                    <div class="form-group" style="flex: 2; min-width: 220px;">
+                        <label class="form-label" for="tripSelect">Select Saved Itinerary</label>
+                        <select id="tripSelect" name="trip_id" class="form-control" required>
+                            {% for trip in trips %}
+                                <option value="{{ trip.trip_id }}">{{ trip.trip_name }} ({{ trip.starting_city }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label class="form-label" for="plannedDays">Planned Days</label>
+                        <input type="number" id="plannedDays" name="planned_days" class="form-control" value="1" min="1" max="30" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">+ Add Stop</button>
+                </form>
+            {% else %}
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">You don't have any trip plans yet.</p>
+                <a href="{{ url_for('trip_list') }}" class="btn btn-secondary btn-sm">Create a Trip Plan First</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Operational Logistics & Metadata -->
+    <div>
+        <div class="detail-section">
+            <h2 class="section-heading">Visiting Logistics</h2>
+            <div class="info-list">
+                <div class="info-row">
+                    <span class="info-label">Best Time to Visit</span>
+                    <span class="info-val" style="color: var(--color-accent); font-weight: 600;">{{ destination.best_time_to_visit }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Opening Hours</span>
+                    <span class="info-val">{{ destination.opening_hours_text }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Entry Fee</span>
+                    <span class="info-val">{{ destination.entry_fee_text }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Local Languages</span>
+                    <span class="info-val">{{ destination.local_languages }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h2 class="section-heading">Verified Reference Sources</h2>
+            <div class="info-list">
+                <div>
+                    <span class="info-label" style="display: block; margin-bottom: 0.25rem;">Primary Official Portal</span>
+                    {% if destination.primary_official_source_url %}
+                        <a href="{{ destination.primary_official_source_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--color-accent); word-break: break-all; font-size: 0.88rem;">
+                            {{ destination.primary_official_source_url }} &nearr;
+                        </a>
+                    {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.88rem;">Not available</span>
+                    {% endif %}
+                </div>
+                {% if destination.supporting_source_urls %}
+                    <div style="margin-top: 0.75rem;">
+                        <span class="info-label" style="display: block; margin-bottom: 0.25rem;">Supporting Reference</span>
+                        <a href="{{ destination.supporting_source_urls }}" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary-light); word-break: break-all; font-size: 0.88rem;">
+                            {{ destination.supporting_source_urls }} &nearr;
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

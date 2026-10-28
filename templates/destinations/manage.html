@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Destinations - YatraSetu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Destination Management (CRUD)</h1>
+        <p class="page-subtitle">Demonstrate database insert, view, update, and referential delete operations</p>
+    </div>
+    <a href="{{ url_for('destination_create') }}" class="btn btn-primary">+ Add New Destination</a>
+</div>
+
+<!-- Search & Category Filter -->
+<div class="filter-panel">
+    <form method="GET" action="{{ url_for('manage_destinations') }}" class="filter-form">
+        <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label" for="manageSearch">Search by Place Name or State</label>
+            <input type="text" id="manageSearch" name="q" class="form-control" placeholder="Type destination or state..." value="{{ search_query }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Search</button>
+        <button type="button" id="clearFiltersBtn" class="btn btn-secondary">Reset</button>
+    </form>
+</div>
+
+<!-- Destinations Table -->
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 60px;">ID</th>
+                <th>Place Name</th>
+                <th>City / Locality</th>
+                <th>District</th>
+                <th>State / UT</th>
+                <th>Category</th>
+                <th>Trip Plan Stops</th>
+                <th style="text-align: right; width: 180px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if destinations %}
+                {% for d in destinations %}
+                    <tr>
+                        <td><strong>#{{ d.destination_id }}</strong></td>
+                        <td>
+                            <a href="{{ url_for('destination_detail', destination_id=d.destination_id) }}" style="color: var(--color-primary); font-weight: 600; text-decoration: none;">
+                                {{ d.place_name }}
+                            </a>
+                        </td>
+                        <td>{{ d.locality_city }}</td>
+                        <td>{{ d.district }}</td>
+                        <td>{{ d.state_ut }}</td>
+                        <td><span class="badge badge-default">{{ d.category }}</span></td>
+                        <td>
+                            {% if d.active_trip_stops > 0 %}
+                                <span class="badge" style="background-color: #fee2e2; color: #991b1b;">
+                                    {{ d.active_trip_stops }} plan(s)
+                                </span>
+                            {% else %}
+                                <span style="color: var(--text-light); font-size: 0.85rem;">None</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a href="{{ url_for('destination_edit', destination_id=d.destination_id) }}" class="btn btn-secondary btn-sm" title="Edit Destination">
+                                ✏️ Edit
+                            </a>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btn-delete-trigger"
+                                    data-action="{{ url_for('destination_delete', destination_id=d.destination_id) }}"
+                                    data-name="{{ d.place_name }} (ID #{{ d.destination_id }})"
+                                    data-warning="{% if d.active_trip_stops > 0 %}WARNING: This destination is part of {{ d.active_trip_stops }} active trip plan(s). MySQL referential integrity (ON DELETE RESTRICT) will reject this deletion!{% else %}This will remove the destination, its details, and its budget estimates from MySQL.{% endif %}">
+                                🗑️ Delete
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        No destination records match your search.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1rem 1.25rem; font-size: 0.88rem; color: #1e40af;">
+    <strong>ℹ️ College DBMS Demonstration Note:</strong>
+    Modifying or deleting records here applies directly to MySQL tables (<code>destination_core</code>, <code>destination_details</code>, <code>budget_estimates</code>). The original CSV files in the project root remain permanently unmodified. If a destination is currently linked to an active itinerary in <code>trip_plan_destinations</code>, the deletion will be safely rejected by MySQL's <code>ON DELETE RESTRICT</code> foreign key constraint.
+</div>
+{% endblock %}

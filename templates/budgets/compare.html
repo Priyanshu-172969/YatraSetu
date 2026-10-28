@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Comparison - YatraSetu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Budget Comparison Explorer</h1>
+        <p class="page-subtitle">Compare itemized travel cost estimates across starting departure hubs</p>
+    </div>
+</div>
+
+<!-- Destination Selector Form -->
+<div class="filter-panel">
+    <form method="GET" action="{{ url_for('budget_compare') }}" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 2; min-width: 280px;">
+            <label class="form-label" for="destSelector">Select Destination to Compare</label>
+            <select id="destSelector" name="destination_id" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Choose a Destination --</option>
+                {% for d in destinations %}
+                    <option value="{{ d.destination_id }}" {% if selected_dest and selected_dest.destination_id == d.destination_id %}selected{% endif %}>
+                        {{ d.place_name }} ({{ d.locality_city }}, {{ d.state_ut }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Compare Rates</button>
+    </form>
+</div>
+
+{% if selected_dest %}
+    <!-- Destination Context Header -->
+    <div style="background-color: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge badge-default" style="margin-bottom: 0.5rem;">{{ selected_dest.category }}</span>
+                <h2 style="color: var(--color-primary); font-size: 1.5rem; font-weight: 700;">{{ selected_dest.place_name }}</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">📍 {{ selected_dest.locality_city }}, {{ selected_dest.state_ut }}</p>
+            </div>
+            <a href="{{ url_for('destination_detail', destination_id=selected_dest.destination_id) }}" class="btn btn-secondary btn-sm">
+                View Full Destination Profile &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Side-by-Side Starting City Comparison Cards -->
+    {% if estimates %}
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin-bottom: 1.25rem;">
+            Available Origin Hub Estimates ({{ estimates|length }} Routes)
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            {% for est in estimates %}
+                <div class="card" style="border-top: 4px solid var(--color-accent);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h4 style="font-size: 1.2rem; font-weight: 700; color: var(--color-primary);">
+                            🛫 {{ est.starting_city }}
+                        </h4>
+                        <span class="badge" style="background-color: #eff6ff; color: #1e40af;">
+                            {{ est.trip_duration_days }} Days / {{ est.accommodation_nights }} Nights
+                        </span>
+                    </div>
+
+                    <div style="background-color: var(--bg-muted); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; text-align: center;">
+                        <span style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">
+                            Estimated Total Budget
+                        </span>
+                        <strong style="font-size: 1.85rem; color: var(--color-primary); font-weight: 800;">
+                            ₹{{ "{:,.2f}".format(est.estimated_total_budget_inr) }}
+                        </strong>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem;">
+                            Indicative prototype estimate
+                        </span>
+                    </div>
+
+                    <!-- Itemized Breakdown -->
+                    <div class="info-list" style="font-size: 0.88rem; margin-bottom: 1rem;">
+                        <div class="info-row">
+                            <span class="info-label">Long-Distance Transit</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.long_distance_round_trip_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Onward Transit</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.onward_transport_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Local Commute</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.local_transport_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Accommodation</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.accommodation_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Food & Water</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.food_and_water_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Entry / Mandatory Fees</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.entry_and_mandatory_fees_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Other Essentials</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.other_essential_cost_inr) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Contingency Buffer</span>
+                            <span class="info-val">₹{{ "{:,.2f}".format(est.contingency_cost_inr) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Methodology & Source Details -->
+                    <div style="border-top: 1px solid var(--border-light); padding-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted);">
+                        <p style="margin-bottom: 0.35rem;">
+                            <strong>Mode & Class:</strong> {{ est.transport_mode }} ({{ est.transport_class }})
+                        </p>
+                        <p style="margin-bottom: 0.35rem;">
+                            <strong>Travel Period:</strong> {{ est.target_travel_period }}
+                        </p>
+                        <p style="margin-bottom: 0.35rem;">
+                            <strong>Methodology:</strong> {{ est.calculation_methodology }}
+                        </p>
+                        <p style="margin-bottom: 0.35rem;">
+                            <strong>Confidence:</strong> {{ est.confidence_level }} (Checked: {{ est.date_checked }})
+                        </p>
+                        {% if est.limitations %}
+                            <p style="color: var(--color-warning); font-size: 0.78rem;">
+                                ⚠️ <strong>Note:</strong> {{ est.limitations }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background-color: var(--bg-surface); padding: 2.5rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+            <p style="color: var(--text-muted);">No budget estimates found for this destination.</p>
+        </div>
+    {% endif %}
+
+{% else %}
+    <div style="background-color: var(--bg-surface); padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+        <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">Select a Destination Above</h3>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto;">
+            Choose any destination from the dropdown to compare its detailed itemized travel expenses across Bengaluru, Kolkata, New Delhi, and any future origin cities in the database.
+        </p>
+    </div>
+{% endif %}
+{% endblock %}

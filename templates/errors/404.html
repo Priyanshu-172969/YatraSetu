@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - YatraSetu{% endblock %}
+
+{% block content %}
+<div style="background-color: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 4rem 2rem; text-align: center; max-width: 600px; margin: 3rem auto;">
+    <h1 style="font-size: 3rem; color: var(--color-primary); font-weight: 800; margin-bottom: 0.5rem;">404</h1>
+    <h2 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 1rem;">Destination Not Found</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+        The page or travel record you are seeking does not exist or has been relocated.
+    </p>
+    <a href="{{ url_for('home') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}

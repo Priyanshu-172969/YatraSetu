@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Indian Destinations - YatraSetu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Destination Explorer</h1>
+        <p class="page-subtitle">Discover monuments, natural wonders, and cultural sanctuaries across India</p>
+    </div>
+    <a href="{{ url_for('destination_create') }}" class="btn btn-primary btn-sm">+ Add New Destination</a>
+</div>
+
+<!-- Dynamic Search & Filter Form -->
+<div class="filter-panel">
+    <form method="GET" action="{{ url_for('destination_list') }}" class="filter-form">
+        <div class="form-group">
+            <label class="form-label" for="searchInput">Search by Name</label>
+            <input type="text" id="searchInput" name="q" class="form-control" placeholder="e.g. Taj Mahal, Hampi, Qutb..." value="{{ search_query }}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="stateSelect">State / UT</label>
+            <select id="stateSelect" name="state" class="form-control">
+                <option value="">All States & UTs</option>
+                {% for st in states %}
+                    <option value="{{ st }}" {% if selected_state == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="categorySelect">Category</label>
+            <select id="categorySelect" name="category" class="form-control">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <button type="button" id="clearFiltersBtn" class="btn btn-secondary">Clear</button>
+    </form>
+</div>
+
+<!-- Results Counter -->
+<div style="margin-bottom: 1.25rem; font-size: 0.92rem; color: var(--text-muted);">
+    Showing <strong>{{ destinations|length }}</strong> destinations
+    {% if total_matches %} of {{ total_matches }} matching your criteria{% endif %}
+</div>
+
+<!-- Destination Grid -->
+{% if destinations %}
+    <div class="card-grid">
+        {% for dest in destinations %}
+            <div class="card">
+                <div class="card-header-bar">
+                    <span class="badge badge-default">{{ dest.category }}</span>
+                    <small style="color: var(--text-light); font-weight: 600;">ID #{{ dest.destination_id }}</small>
+                </div>
+                <h3 style="margin-bottom: 0.35rem;">
+                    <a href="{{ url_for('destination_detail', destination_id=dest.destination_id) }}" class="card-title">
+                        {{ dest.place_name }}
+                    </a>
+                </h3>
+                <div class="card-location">
+                    📍 {{ dest.locality_city }}, {{ dest.district }}, {{ dest.state_ut }}
+                </div>
+                <p class="card-desc">
+                    {{ dest.description[:140] }}{% if dest.description|length > 140 %}...{% endif %}
+                </p>
+                <div class="card-footer-actions">
+                    <a href="{{ url_for('destination_detail', destination_id=dest.destination_id) }}" class="btn btn-secondary btn-sm">
+                        View Details
+                    </a>
+                    <a href="{{ url_for('budget_compare', destination_id=dest.destination_id) }}" class="btn btn-primary btn-sm">
+                        Budgets
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="Destination pages">
+            {% if current_page > 1 %}
+                <a href="{{ url_for('destination_list', page=current_page-1, q=search_query, state=selected_state, category=selected_category) }}" class="page-link">&laquo; Prev</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+                <a href="{{ url_for('destination_list', page=p, q=search_query, state=selected_state, category=selected_category) }}"
+                   class="page-link {% if p == current_page %}active{% endif %}">
+                    {{ p }}
+                </a>
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('destination_list', page=current_page+1, q=search_query, state=selected_state, category=selected_category) }}" class="page-link">Next &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+{% else %}
+    <div style="background-color: var(--bg-surface); padding: 3rem; border-radius: var(--radius-lg); text-align: center; border: 1px solid var(--border-light);">
+        <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">No Destinations Found</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            No destination matches your current search or filter combination.
+        </p>
+        <a href="{{ url_for('destination_list') }}" class="btn btn-secondary">Clear All Filters</a>
+    </div>
+{% endif %}
+{% endblock %}

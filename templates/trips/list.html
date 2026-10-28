@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Trip Planner - YatraSetu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Trip Planner</h1>
+        <p class="page-subtitle">Build, sequence, and customize multi-destination Indian itineraries</p>
+    </div>
+    <a href="#createTripSection" class="btn btn-primary">+ Create New Trip Plan</a>
+</div>
+
+<!-- Existing Trip Plans Listing -->
+{% if trips %}
+    <div class="card-grid" style="margin-bottom: 3rem;">
+        {% for trip in trips %}
+            <div class="card">
+                <div class="card-header-bar">
+                    <span class="badge" style="background-color: #e0e7ff; color: #3730a3;">
+                        🛫 {{ trip.starting_city }}
+                    </span>
+                    <small style="color: var(--text-light); font-weight: 600;">Trip #{{ trip.trip_id }}</small>
+                </div>
+                <h3 style="margin-bottom: 0.35rem;">
+                    <a href="{{ url_for('trip_detail', trip_id=trip.trip_id) }}" class="card-title">
+                        {{ trip.trip_name }}
+                    </a>
+                </h3>
+                <div class="card-location">
+                    ⏱️ Target: <strong>{{ trip.planned_duration_days }} days</strong> &nbsp;|&nbsp; 📍 <strong>{{ trip.total_stops }} stop(s)</strong>
+                </div>
+                {% if trip.notes %}
+                    <p class="card-desc" style="font-style: italic; color: var(--text-muted);">
+                        "{{ trip.notes[:120] }}{% if trip.notes|length > 120 %}...{% endif %}"
+                    </p>
+                {% else %}
+                    <p class="card-desc" style="color: var(--text-light); font-size: 0.88rem;">
+                        No special notes added.
+                    </p>
+                {% endif %}
+                <div class="card-footer-actions">
+                    <a href="{{ url_for('trip_detail', trip_id=trip.trip_id) }}" class="btn btn-primary btn-sm">
+                        Manage Itinerary
+                    </a>
+                    <div style="display: flex; gap: 0.35rem;">
+                        <a href="{{ url_for('trip_edit', trip_id=trip.trip_id) }}" class="btn btn-secondary btn-sm" title="Edit Trip Details">
+                            ✏️
+                        </a>
+                        <button type="button"
+                                class="btn btn-danger btn-sm btn-delete-trigger"
+                                data-action="{{ url_for('trip_delete', trip_id=trip.trip_id) }}"
+                                data-name="{{ trip.trip_name }}"
+                                data-warning="Deleting this trip plan will automatically remove all {{ trip.total_stops }} scheduled destination stops (ON DELETE CASCADE).">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div style="background-color: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); padding: 3rem 1.5rem; text-align: center; margin-bottom: 3rem;">
+        <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">No Trip Plans Created Yet</h3>
+        <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem;">
+            Create your first travel itinerary below. You will be able to add multiple destination stops, sequence them in order, and customize days per location.
+        </p>
+    </div>
+{% endif %}
+
+<!-- Create New Trip Plan Form -->
+<div id="createTripSection" class="detail-section" style="max-width: 800px; margin: 0 auto;">
+    <h2 class="section-heading">✨ Create a New Trip Plan</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Plan stored directly in MySQL (<code>trip_plans</code>). Starting cities are populated dynamically from the database.
+    </p>
+
+    <form method="POST" action="{{ url_for('trip_create') }}" class="needs-validation">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="trip_name">Trip Name *</label>
+                <input type="text" id="trip_name" name="trip_name" class="form-control" required maxlength="150" placeholder="e.g. Rajasthan Heritage Tour">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="planned_duration_days">Planned Duration (Days) *</label>
+                <input type="number" id="planned_duration_days" name="planned_duration_days" class="form-control" required min="1" max="90" value="7">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="starting_city">Starting Departure City *</label>
+            <select id="starting_city" name="starting_city" class="form-control" required>
+                <option value="">-- Choose Origin Hub --</option>
+                {% for city in starting_cities %}
+                    <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+            </select>
+            <small style="color: var(--text-light); font-size: 0.78rem;">Populated dynamically from database budget records.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label" for="notes">Trip Notes (Optional)</label>
+            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Travel companions, packing list, preferred season, or itinerary goals..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            💾 Save Trip Plan & Add Destinations
+        </button>
+    </form>
+</div>
+{% endblock %}
